@@ -29,21 +29,21 @@ QUERIES
 
 5) Calculate the total sum of orders with status "accepted"
 	
-	SELECT SUM(price) AS "Total"
+	SELECT SUM(`price`) AS "Total"
 	FROM `pagamenti`
 	WHERE status = "accepted";
 
 6) What is the highest price to have been paid?
 	
-	SELECT MAX(price) AS "Highest_Price"
+	SELECT MAX(`price`) AS "Highest_Price"
 	FROM `pagamenti`;
 
 7) Select the customers IDed by Driving License and born in 1975
 	
 	SELECT *
 	FROM `ospiti`
-	WHERE document_type = "Driver License"
-	AND YEAR(date_of_birth) = "1975";
+	WHERE `document_type` = "Driver License"
+	AND YEAR(`date_of_birth`) = "1975";
 
 8) How many beds does the hotel have in total?
 	

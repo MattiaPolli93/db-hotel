@@ -91,7 +91,7 @@ JOIN
 
 1) What is the name of the customers who made more than two reservations?
 
-    SELECT COUNT(`prenotazioni_has_ospiti`.`id`) AS "Reservations_Number", `prenotazioni_has_ospiti`.`ospite_id` AS "Customer_ID", `ospiti`.`name`, `ospiti`.`lastname`
+    SELECT COUNT(`prenotazioni_has_ospiti`.`id`) AS "Reservations_Number", `prenotazioni_has_ospiti`.`ospite_id` AS "id_ospite", `ospiti`.`name`, `ospiti`.`lastname`
     FROM `prenotazioni_has_ospiti`
     INNER JOIN `ospiti`
     ON `prenotazioni_has_ospiti`.`ospite_id` = `ospiti`.`id`

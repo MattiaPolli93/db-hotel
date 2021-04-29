@@ -1,8 +1,10 @@
+QUERIES
+
 1) Select all customers who have been IDed by Identity Card
 
 	SELECT *
 	FROM `ospiti`
-	WHERE document_type = "CI";
+	WHERE `document_type` = "CI";
 
 2) Select all customers who were born after 1988
 
@@ -27,13 +29,13 @@
 
 5) Calculate the total sum of orders with status "accepted"
 	
-	SELECT SUM(price) AS Total
+	SELECT SUM(price) AS "Total"
 	FROM `pagamenti`
 	WHERE status = "accepted";
 
 6) What is the highest price to have been paid?
 	
-	SELECT MAX(price) AS Highest_Price
+	SELECT MAX(price) AS "Highest_Price"
 	FROM `pagamenti`;
 
 7) Select the customers IDed by Driving License and born in 1975
@@ -45,5 +47,105 @@
 
 8) How many beds does the hotel have in total?
 	
-	SELECT SUM(beds) AS Number_of_Beds
+	SELECT SUM(`beds`) AS "Number_of_Beds"
 	FROM `stanze`;
+
+
+GROUP BY
+
+1) Count customers by grouping them by birth year
+
+    SELECT COUNT(`id`), YEAR(`date_of_birth`)
+    FROM `ospiti`
+    GROUP BY YEAR(`date_of_birth`);
+
+2) Sum payment prices grouping them according to status
+
+    SELECT SUM(`price`) AS "Total", `status`
+    FROM `pagamenti`
+    GROUP BY `status`;
+
+3) Count how many times each room was reserved
+
+    SELECT COUNT(`id`), `stanza_id` 
+    FROM `prenotazioni`
+    GROUP BY `stanza_id`;
+
+4) See whether there are hours when reservations were more common
+
+    SELECT COUNT(`id`), HOUR(`created_at`)
+    FROM `prenotazioni`
+    GROUP BY HOUR(`created_at`)
+    ORDER BY HOUR(`created_at`) DESC;
+
+5) How many reservations did the customer with more reservations make?
+
+    SELECT COUNT(`id`) AS "Reservations_Made", `ospite_id`
+    FROM `prenotazioni_has_ospiti`
+    GROUP BY `ospite_id`
+    ORDER BY Reservations_Made DESC
+    LIMIT 1;
+
+
+JOIN
+
+1) What is the name of the customers who made more than two reservations?
+
+    SELECT COUNT(`prenotazioni_has_ospiti`.`id`) AS "Reservations_Number", `prenotazioni_has_ospiti`.`ospite_id` AS "Customer_ID", `ospiti`.`name`, `ospiti`.`lastname`
+    FROM `prenotazioni_has_ospiti`
+    INNER JOIN `ospiti`
+    ON `prenotazioni_has_ospiti`.`ospite_id` = `ospiti`.`id`
+    GROUP BY `id_ospite`
+    HAVING COUNT(`prenotazioni_has_ospiti`.`id`) > 1
+    ORDER BY Reservations_Number DESC;
+
+2) Print all customers per reservation
+
+    SELECT `prenotazioni_has_ospiti`.`prenotazione_id` AS "Reservation", `prenotazioni_has_ospiti`.`ospite_id` AS "id_ospite", `ospiti`.`name`, `ospiti`.`lastname`
+    FROM `prenotazioni_has_ospiti`
+    INNER JOIN `ospiti`
+    ON `prenotazioni_has_ospiti`.`ospite_id` = `ospiti`.`id`
+    ORDER BY Reservation ASC;
+
+3) Print Name, Last Name, Price and Paying for all reservations made in May 2018
+
+    SELECT `ospiti`.`name` AS "Customer_Name", `ospiti`.`lastname` AS "Customer_Lastname", `pagamenti`.`price` AS "Price", `paganti`.`name` AS "Paying_Name", `paganti`.`lastname` AS "Paying_Lastname"
+    FROM `ospiti`
+    INNER JOIN `prenotazioni_has_ospiti`
+    ON `ospiti`.`id` = `prenotazioni_has_ospiti`.`ospite_id`
+    INNER JOIN `prenotazioni`
+    ON `prenotazioni_has_ospiti`.`prenotazione_id` = `prenotazioni`.`id`
+    INNER JOIN `pagamenti`
+    ON `prenotazioni`.`id` = `pagamenti`.`prenotazione_id`
+    INNER JOIN `paganti`
+    ON `pagamenti`.`pagante_id` = `paganti`.`id`
+    WHERE `prenotazioni`.`created_at` LIKE "2018-05%"
+    ORDER BY Price DESC;
+
+4) Sum all the reservation prices for the rooms on the first floor
+
+    SELECT SUM(`pagamenti`.`price`) AS "Reservation_Price_Sum"
+    FROM `pagamenti`
+    INNER JOIN `prenotazioni`
+    ON `pagamenti`.`prenotazione_id` = `prenotazioni`.`id`
+    INNER JOIN `stanze`
+    ON `prenotazioni`.`stanza_id` = `stanze`.`id`
+    WHERE `stanze`.`floor` = 1;
+
+5) Get the billing data for the reservation with id=7
+
+    SELECT `prenotazioni`.`id`, `name`, `lastname`, `address` 
+	FROM `paganti`
+	INNER JOIN `pagamenti`
+	ON `pagamenti`.`pagante_id` = `paganti`.`id`
+	INNER JOIN `prenotazioni`
+	ON `prenotazioni`.`id` = `pagamenti`.`prenotazione_id`
+	WHERE `prenotazioni`.`id` = 7;
+
+6) Were all the rooms booked at least once? (Show those yet not booked) 
+
+    SELECT `stanze`.*
+    FROM `stanze`
+    LEFT JOIN `prenotazioni`
+    ON `stanze`.`id` = `prenotazioni`.`stanza_id`
+    WHERE `prenotazioni`.`stanza_id` IS NULL;
